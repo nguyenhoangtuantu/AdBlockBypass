@@ -1,4 +1,4 @@
-﻿# AdBlock Bypass - Premium Features Unlocker
+# AdBlock Bypass - Premium Features Unlocker
 
 ## 📋 Description
 
@@ -7,14 +7,6 @@ This is a modified version of the [AdBlock](https://getadblock.com/) browser ext
 - **🍪 Skip Cookie Walls** — Automatically hides cookie consent popups on websites
 - **🚫 Block Distractions** — Blocks distracting elements like login popups, newsletter modals, chat widgets, and app download prompts
 
-## 🔧 What Was Modified
-
-Only **2 files** were changed to bypass the premium license check:
-
-| File | Change |
-|------|--------|
-| `button/components/PopupSection.js` | Force premium UI toggle instead of "Learn More" lock button |
-| `abp-background.js` | Always return `activeLicense = true` to enable premium features |
 
 ## 🚀 Installation
 
