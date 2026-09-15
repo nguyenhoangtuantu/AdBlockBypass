@@ -39,6 +39,11 @@ async function initializeLicense() {
     "isLicenseCodeValid",
   ];
   localLicense = await modulesAsGlobal.messaging.send("adblock:getLicenseConfig");
+  // Bypass premium license check - force premium active
+  localLicense.isActiveLicense = true;
+  localLicense.shouldShowMyAdBlockEnrollment = false;
+  localLicense.shouldShowPremiumCTA = true;
+  localLicense.isLicenseCodeValid = true;
   /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   License = new Proxy(localLicense, {
     get(obj, prop) {
