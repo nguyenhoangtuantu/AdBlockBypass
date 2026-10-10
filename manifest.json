@@ -1,6 +1,5 @@
 {
-"update_url": "https://clients2.google.com/service/update2/crx",
-
+  "update_url": "https://clients2.google.com/service/update2/crx",
   "author": "Adblock, Inc.",
   "content_scripts": [
     {
@@ -26,7 +25,8 @@
     {
       "all_frames": true,
       "js": [
-        "vendor/@eyeo/webext-ad-filtering-solution/content-main.js"
+        "vendor/@eyeo/webext-ad-filtering-solution/content-main.js",
+        "adblock-shield-main.js"
       ],
       "match_about_blank": true,
       "matches": [
@@ -207,7 +207,7 @@
       },
       {
         "id": "0798B6A2-94A4-4ADF-89ED-BEC112FC4C7F",
-        "enabled": true,
+        "enabled": false,
         "path": "data/rules/dnr/0798B6A2-94A4-4ADF-89ED-BEC112FC4C7F"
       },
       {
@@ -217,7 +217,7 @@
       },
       {
         "id": "0B0296EB-1CC5-49CD-AD38-8AF27420B7E4",
-        "enabled": false,
+        "enabled": true,
         "path": "data/rules/dnr/0B0296EB-1CC5-49CD-AD38-8AF27420B7E4"
       },
       {
@@ -237,7 +237,7 @@
       },
       {
         "id": "1C571EC7-6E52-47CC-B04A-4B3008D0AEBE",
-        "enabled": false,
+        "enabled": true,
         "path": "data/rules/dnr/1C571EC7-6E52-47CC-B04A-4B3008D0AEBE"
       },
       {
@@ -277,12 +277,12 @@
       },
       {
         "id": "588470E8-E163-4CD9-A909-521B2A3BE73F",
-        "enabled": false,
+        "enabled": true,
         "path": "data/rules/dnr/588470E8-E163-4CD9-A909-521B2A3BE73F"
       },
       {
         "id": "5BD2BB73-459D-4A74-AF9D-A10157268350",
-        "enabled": false,
+        "enabled": true,
         "path": "data/rules/dnr/5BD2BB73-459D-4A74-AF9D-A10157268350"
       },
       {
@@ -297,7 +297,7 @@
       },
       {
         "id": "8C13E995-8F06-4927-BEA7-6C845FB7EEBF",
-        "enabled": true,
+        "enabled": false,
         "path": "data/rules/dnr/8C13E995-8F06-4927-BEA7-6C845FB7EEBF"
       },
       {
@@ -317,7 +317,7 @@
       },
       {
         "id": "9CC3AF4D-EB89-4100-97C6-4EEE4F8A2E82",
-        "enabled": false,
+        "enabled": true,
         "path": "data/rules/dnr/9CC3AF4D-EB89-4100-97C6-4EEE4F8A2E82"
       },
       {
@@ -347,7 +347,7 @@
       },
       {
         "id": "CDAD4CF5-2706-42CB-B404-F5B9B61B8CAA",
-        "enabled": false,
+        "enabled": true,
         "path": "data/rules/dnr/CDAD4CF5-2706-42CB-B404-F5B9B61B8CAA"
       },
       {
@@ -357,7 +357,7 @@
       },
       {
         "id": "D72B6F06-52B2-4FED-96A2-1BF59CDD7AEC",
-        "enabled": false,
+        "enabled": true,
         "path": "data/rules/dnr/D72B6F06-52B2-4FED-96A2-1BF59CDD7AEC"
       },
       {

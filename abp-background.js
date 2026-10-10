@@ -18303,10 +18303,10 @@ const License = (function getLicense() {
       return formattedDate;
     },
     async isActiveLicense() {
-      return _eyeo_webext_ad_filtering_solution__WEBPACK_IMPORTED_MODULE_0__.account.hasPremium();
+      return true;
     },
     isLicenseCodeValid() {
-      return License && License.get().code && typeof License.get().code === "string";
+      return true;
     },
     isMyAdBlockEnrolled() {
       return License && License.get() && License.get().myadblock_enrollment === true;
@@ -77976,10 +77976,7 @@ function hasPremiumFeature(features) {
  * @returns {Promise<boolean>}
  */
 async function hasPremium() {
-  const state = await accountData.getStateLoaded();
-  const user = state.user || {};
-
-  return !!user.hasPremium;
+  return true;
 }
 
 /**
