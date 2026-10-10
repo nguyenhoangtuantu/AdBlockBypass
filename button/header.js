@@ -93,7 +93,7 @@ const addLogoAndTheme = (info, $template) => {
 
   const $logo = $template.find(".header-logo");
   $logo.attr("src", `icons/${popupMenuTheme}/logo.svg`);
-  $logo.attr("alt", translate("adblock_logo"));
+  $logo.attr("alt", "TuBlock");
 };
 
 const checkAnddisableOnPageOptions = (info, $template) => {

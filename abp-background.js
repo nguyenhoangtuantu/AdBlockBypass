@@ -6514,13 +6514,10 @@ async function getExperimentAssignments() {
  * @returns {string} The integration name
  */
 function getIntegrationName(manifestShortName) {
-  if (manifestShortName === "AdBlock") {
-    return adblockName;
-  } else if (manifestShortName === "Adblock Plus") {
+  if (manifestShortName === "Adblock Plus") {
     return adblockPlusName;
   }
-
-  throw new Error("Invalid extension name");
+  return adblockName;
 }
 
 ;// ../../node_modules/@eyeo-fragments/public-api/src/content/main-public-api.js

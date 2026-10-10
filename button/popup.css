@@ -325,6 +325,10 @@ button.premium-cta-close:hover {
   background-color: #2284f7;
 }
 
+#div_vpn_cta {
+  display: none !important;
+}
+
 #div_vpn_cta:hover {
   background-color: var(--popup-vpn-cta-hover-bg-color);
   color: var(--popup-vpn-cta-hover-color);
