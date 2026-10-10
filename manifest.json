@@ -1,6 +1,6 @@
 {
   "update_url": "https://clients2.google.com/service/update2/crx",
-  "author": "Adblock, Inc.",
+  "author": "Nguyễn Hoàng Tuấn Tú",
   "content_scripts": [
     {
       "all_frames": true,
@@ -149,9 +149,9 @@
       "run_at": "document_idle"
     }
   ],
-  "name": "__MSG_name__",
-  "short_name": "__MSG_short_name__",
-  "description": "__MSG_description__",
+  "name": "TuBlock",
+  "short_name": "TuBlock",
+  "description": "TuBlock — Siêu trình chặn quảng cáo, diệt sạch popunder, popup cá cược và first-party ads.",
   "default_locale": "en_US",
   "devtools_page": "devtools.html",
   "externally_connectable": {

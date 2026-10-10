@@ -1,20 +1,25 @@
-# AdBlock Bypass - Premium Features Unlocker
+# 🛡️ TuBlock — Super AdBlocker & Circumvention Defuser
 
-## 📋 Description
+## 📋 Giới thiệu (Overview)
 
-This is a modified version of the [AdBlock](https://getadblock.com/) browser extension that unlocks two premium features for testing and educational purposes:
+**TuBlock** là phiên bản AdBlocker tùy biến mạnh mẽ, được tối ưu đặc trị các trang web xem phim lậu, truyện tranh và bóng đá tại Việt Nam:
 
-- **🍪 Skip Cookie Walls** — Automatically hides cookie consent popups on websites
-- **🚫 Block Distractions** — Blocks distracting elements like login popups, newsletter modals, chat widgets, and app download prompts
+- **🚫 Diệt First-Party Ads & Banner cờ bạc:** Tự động phát hiện và triệt tiêu các banner cá cược cứng (789BET, 11BET, 78WIN, QQ88, HI88...) nhúng trực tiếp vào mã nguồn website.
+- **🛑 Bẻ gãy Popunder & Click-Hijacking:** Chặn đứng các hành vi giả lập click mở tab mới sang trang web độc hại.
+- **🛡️ Phá vỡ Click-Shield Overlays:** Tự động gỡ các lớp kính tàng hình đè lên Video Player mà không gây crash Next.js / React Virtual DOM.
+- **🍪 Tự động vượt Cookie Walls & Distraction Control:** Mở khóa toàn bộ tính năng Premium.
+- **🇻🇳 Kích hoạt sẵn ABPVN List:** Tích hợp bộ luật lọc quảng cáo toàn diện nhất cho người dùng Việt Nam.
 
+## 🚀 Cài đặt (Installation)
 
-## 🚀 Installation
-
-1. Download or clone this repository
-2. Open `chrome://extensions` in your browser
-3. Enable **Developer mode** (top right corner)
-4. Click **Load unpacked** and select the project folder
-5. Open the AdBlock popup — you should now see toggle switches for both premium features
+1. Tải hoặc clone repository này về máy:
+   ```bash
+   git clone git@github.com:nguyenhoangtuantu/AdBlockBypass.git
+   ```
+2. Mở trình duyệt (Chrome / Cốc Cốc / Brave / Edge) và truy cập: `chrome://extensions` (hoặc `coccoc://extensions`, `brave://extensions`)
+3. Bật **Developer mode** (Chế độ dành cho nhà phát triển ở góc trên bên phải)
+4. Bấm **Load unpacked** (Tải tiện ích đã giải nén) và chọn thư mục `AdBlockBypass`
+5. Tận hưởng trải nghiệm lướt web sạch bóng quảng cáo với **TuBlock**!
 
 ## 🙏 Acknowledgments
 

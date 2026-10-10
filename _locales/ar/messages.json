@@ -1,10 +1,10 @@
 {
   "name": {
-    "message": "AdBlock — أفضل مانع إعلانات",
+    "message": "TuBlock",
     "description": "Extension name to be shown for release / published builds.  The extension name 'AdBlock' should NOT be translated, but the text after the dash should be translated"
   },
   "short_name": {
-    "message": "AdBlock",
+    "message": "TuBlock",
     "description": "Extension name.  This message does NOT need to be translated"
   },
   "description": {
