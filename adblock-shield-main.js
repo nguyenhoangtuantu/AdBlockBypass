@@ -25,6 +25,24 @@
     };
   } catch(e) {}
 
+  // 0.5 Popunder Event Listener Guardian
+  // Blocks scripts from hijacking click/mousedown with popunder timers (like xnhau webGate)
+  try {
+    const origAddEventListener = EventTarget.prototype.addEventListener;
+    EventTarget.prototype.addEventListener = function(type, listener, options) {
+      if ((type === 'click' || type === 'mousedown' || type === 'pointerdown') && typeof listener === 'function') {
+        try {
+          const fnStr = Function.prototype.toString.call(listener);
+          if (/lastPopunderTime|openUntil|acquirecardedsullen|badlandlispyippee|POPUNDER_INTERVAL|__PPU_SESSION_/i.test(fnStr)) {
+            console.warn('[AdBlockShield] Neutralized popunder event listener:', type);
+            return;
+          }
+        } catch(err) {}
+      }
+      return origAddEventListener.apply(this, arguments);
+    };
+  } catch(e) {}
+
   // Safe DOM hiding utility — NEVER call node.remove() on React-managed nodes!
   function hideSafely(node) {
     if (!node || !node.style) return;
@@ -43,13 +61,16 @@
   }
 
   // 1. Site-Specific VIP / Ad-Free LocalStorage Flags
-  // Defuses site-native ad hooks like chophim.app useShouldShowBanners & useShouldShowAds
+  // Defuses site-native ad hooks like chophim.app useShouldShowBanners & useShouldShowAds, and xnhau lastPopunderTime
   try {
     const forever = String(Date.now() + 315360000000); // 10 years in future
     window.localStorage.setItem('chophim:banner-blocked-until', forever);
     window.localStorage.setItem('chophim:popup-ad-dismissed-until', forever);
     window.localStorage.setItem('banner-blocked-until', forever);
     window.localStorage.setItem('popup-ad-dismissed-until', forever);
+    window.localStorage.setItem('lastPopunderTime', forever);
+    window.localStorage.setItem('xnPopSeen', '999999');
+    window.localStorage.setItem('__PPU_ppucnt', '999999');
     window.dispatchEvent(new Event('chophim:banner-blocked'));
     window.dispatchEvent(new Event('chophim:popup-ads-dismissed'));
   } catch(e) {}
@@ -58,11 +79,11 @@
   const SPAM_PATTERNS = [
     /\b\d{1,3}bet\w*/i, // 11bet, 789bet, 88bet, 188bet...
     /\b789b\w*/i,       // 789b668.me...
-    /\b(78win|fc88|qq88|hi88|s8|i9|i9bet|iwin|b52|sunwin|go88|rikvip|kubet|thabet|shbet|new88|jun88|fb88|w88|bk8|dafabet|m88|fun88|v9bet)\b/i,
+    /\b(cm88|hb88|ok88|mb66|sumvip|sumpro|sumclub|78win|fc88|qq88|hi88|s8|i9|i9bet|iwin|b52|sunwin|go88|rikvip|kubet|thabet|shbet|new88|jun88|fb88|w88|bk8|dafabet|m88|fun88|v9bet)\w*/i,
     /\b(keonhacai|nhacai|soikeo|tylekeo|bongda|cacuoc|casino|nohu|taixiu|xocdia|banca|slot)\b/i,
     /\b(linkroyal|workers\.dev\/chophim|tinyurl\.com|bit\.ly|hpasoj|154\.82\.)/i,
     /(linkvertise|ouo\.io|ouo\.press|megaurl|shorturl|1short|traffic|adbull|shrinke|exe\.io)/i,
-    /(adsterra|popads|propellerads|clickadu|yllix|exoclick|trafficstars|juicyads|hilltopads)/i,
+    /(adsterra|popads|propellerads|clickadu|yllix|exoclick|trafficstars|juicyads|hilltopads|popcash|acquirecardedsullen|badlandlispyippee|astonishlandmass)/i,
     /(delivery|syndication|revenue|onclick|popunder|clickserve)/i,
     /\/ads\/(cat-|pop-|.*banner|.*gif|.*mp4|78win|78-new)/i,
     /quang[\s_-]*cao/i,
@@ -89,7 +110,12 @@
         /* First-party ad media & links on streaming sites */
         img[src*="/ads/"],
         video[src*="/ads/"],
+        source[src*="/ads/"],
+        img[src*="cm88"],
+        video[src*="cm88"],
+        source[src*="cm88"],
         a[href*="/ads/"],
+        a[href*="cm88"],
         a[href*="789b"],
         a[href*="11bet"],
         a[href*="fc88"],
@@ -123,7 +149,16 @@
         div[class*="ad_fixed_bottom"],
         div[class*="floating-banner"],
         div[id*="floating-banner"],
+        .video-ad-wrap,
+        .fxMidWrap:has(a[href*="cm88"]),
+        .fxMidWrap:has(a[href*="qq88"]),
+        .fxMidWrap:has(a[href*="hi88"]),
+        .spot:has(a[href*="cm88"]),
+        .spot:has(.video-ad-wrap),
+        .spot:has(video.fxMid),
         /* Parent containers wrapping ad anchors */
+        div:has(> a[href*="cm88"]),
+        div:has(a[href*="cm88"]),
         div:has(> a[href*="789b"]),
         div:has(> a[href*="linkroyal"]),
         div:has(> a[href*="tinyurl.com"]),
@@ -134,7 +169,10 @@
         div:has(> a[href*="hi88"]),
         div:has(> a[href*="78win"]),
         div:has(> a[href*="hpasoj"]),
-        div:has(> img[src*="/ads/"]) {
+        div:has(> img[src*="/ads/"]),
+        div:has(> video[src*="/ads/"]),
+        div:has(> video:has(source[src*="/ads/"])),
+        div:has(> video:has(source[src*="cm88"])) {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
@@ -167,6 +205,18 @@
         console.warn('[AdBlockShield] Blocked popunder window.open to:', url);
         return null;
       }
+      try {
+        if (url.startsWith('http')) {
+          const u = new URL(url, location.href);
+          if (u.hostname !== location.hostname) {
+            const isStreamingSite = /xnhau|chophim|phim|tube|sex|porn|hentai|anime/i.test(location.hostname);
+            if (isStreamingSite || isSpamUrl(u.hostname) || isSpamUrl(u.href)) {
+              console.warn('[AdBlockShield] Blocked external window.open from streaming site to:', url);
+              return null;
+            }
+          }
+        }
+      } catch(e) {}
     }
     if (!url || url === 'about:blank') {
       const win = realOpen.call(window, 'about:blank', target, features);
@@ -179,6 +229,14 @@
                 console.warn('[AdBlockShield] Blocked deferred popup redirect to:', newUrl);
                 try { win.close(); } catch(e) {}
               } else {
+                try {
+                  const u = new URL(newUrl, location.href);
+                  if (u.hostname !== location.hostname && (/xnhau|chophim|phim|tube|sex|porn|hentai|anime/i.test(location.hostname) || isSpamUrl(u.hostname))) {
+                    console.warn('[AdBlockShield] Blocked deferred external popup to:', newUrl);
+                    try { win.close(); } catch(e) {}
+                    return;
+                  }
+                } catch(e) {}
                 win.location.href = newUrl;
               }
             }
@@ -263,15 +321,18 @@
   // 8. Continuous DOM Cleaner: Target First-Party Ad Components & Overlays Safely
   function cleanAdsAndOverlays() {
     // A. Clean ad images, videos, and their containers
-    document.querySelectorAll('img[src*="/ads/"], video[src*="/ads/"]').forEach(media => {
-      hideSafely(media);
-      let p = media.parentElement;
+    document.querySelectorAll('img[src*="/ads/"], video[src*="/ads/"], img[src*="cm88"], video[src*="cm88"], source[src*="cm88"], source[src*="/ads/"]').forEach(media => {
+      const target = media.tagName === 'SOURCE' ? (media.parentElement || media) : media;
+      hideSafely(target);
+      let p = target.parentElement;
       if (p && (p.tagName === 'A' || p.tagName === 'DIV' || p.tagName === 'SECTION')) {
         hideSafely(p);
         if (p.parentElement && p.parentElement.children.length === 1) {
           hideSafely(p.parentElement);
         }
       }
+      const wrap = target.closest && target.closest('.video-ad-wrap, .fxMidWrap');
+      if (wrap) hideSafely(wrap);
     });
 
     // B. Clean ad links by href
@@ -282,11 +343,13 @@
         if (a.parentElement && a.parentElement.children.length === 1) {
           hideSafely(a.parentElement);
         }
+        const wrap = a.closest && a.closest('.video-ad-wrap, .fxMidWrap');
+        if (wrap) hideSafely(wrap);
       }
     });
 
     // C. Clean ad slots by ID & aria-label
-    document.querySelectorAll('[id*="bottom-slot"], [id*="bottom-banner"], [id*="banner-728x90"], [aria-label*="quang cao" i], [aria-label*="quảng cáo" i]').forEach(el => {
+    document.querySelectorAll('[id*="bottom-slot"], [id*="bottom-banner"], [id*="banner-728x90"], .video-ad-wrap, [aria-label*="quang cao" i], [aria-label*="quảng cáo" i]').forEach(el => {
       hideSafely(el);
     });
 
