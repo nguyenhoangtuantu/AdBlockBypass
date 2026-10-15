@@ -39,7 +39,7 @@ async function initializeLicense() {
     "isLicenseCodeValid",
   ];
   localLicense = await modulesAsGlobal.messaging.send("adblock:getLicenseConfig");
-  // Bypass premium license check - force premium active
+  // Modified for TuBlock (GPLv3) by Nguyễn Hoàng Tuấn Tú (2026): activate client features locally
   localLicense.isActiveLicense = true;
   localLicense.shouldShowMyAdBlockEnrollment = false;
   localLicense.shouldShowPremiumCTA = true;
