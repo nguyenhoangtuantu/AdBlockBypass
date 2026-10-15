@@ -26,15 +26,21 @@
   } catch(e) {}
 
   // 0.5 Popunder Event Listener Guardian
-  // Blocks scripts from hijacking click/mousedown with popunder timers (like xnhau webGate)
+  // Blocks scripts from hijacking click/mousedown/pointerdown with popunder timers or tab-under mechanics
   try {
     const origAddEventListener = EventTarget.prototype.addEventListener;
     EventTarget.prototype.addEventListener = function(type, listener, options) {
       if ((type === 'click' || type === 'mousedown' || type === 'pointerdown') && typeof listener === 'function') {
         try {
           const fnStr = Function.prototype.toString.call(listener);
-          if (/lastPopunderTime|openUntil|acquirecardedsullen|badlandlispyippee|POPUNDER_INTERVAL|__PPU_SESSION_/i.test(fnStr)) {
-            console.warn('[AdBlockShield] Neutralized popunder event listener:', type);
+          // 1. Signature check for known popunder engines & variables
+          const hasPopunderSignature = /lastPopunderTime|openUntil|acquirecardedsullen|badlandlispyippee|POPUNDER_INTERVAL|__PPU_SESSION_|popunder-last-shown|popunderAd|popads|propeller|adsterra|exoclick|clickadu|juicyads|hilltop|popcash|xnPopSeen/i.test(fnStr);
+          // 2. Generic Tab-Under mechanical signature: function combines window.open with location navigation
+          const hasTabUnderMechanic = (fnStr.includes('window.open') || fnStr.includes('.open(')) && 
+                                     (fnStr.includes('location.assign') || fnStr.includes('location.replace') || fnStr.includes('location.href'));
+
+          if (hasPopunderSignature || hasTabUnderMechanic) {
+            console.warn('[AdBlockShield] Neutralized popunder/tabunder event listener:', type);
             return;
           }
         } catch(err) {}
@@ -60,10 +66,12 @@
     } catch(e) {}
   }
 
-  // 1. Site-Specific VIP / Ad-Free LocalStorage Flags
-  // Defuses site-native ad hooks like chophim.app useShouldShowBanners & useShouldShowAds, and xnhau lastPopunderTime
+  // 1. Site-Specific & Generic VIP / Ad-Free LocalStorage Flags
+  // Defuses site-native ad hooks like chophim.app useShouldShowBanners, popunder-last-shown, and xnhau lastPopunderTime
   try {
     const forever = String(Date.now() + 315360000000); // 10 years in future
+    window.localStorage.setItem('chophim:popunder-last-shown', forever);
+    window.localStorage.setItem('popunder-last-shown', forever);
     window.localStorage.setItem('chophim:banner-blocked-until', forever);
     window.localStorage.setItem('chophim:popup-ad-dismissed-until', forever);
     window.localStorage.setItem('banner-blocked-until', forever);
@@ -71,6 +79,8 @@
     window.localStorage.setItem('lastPopunderTime', forever);
     window.localStorage.setItem('xnPopSeen', '999999');
     window.localStorage.setItem('__PPU_ppucnt', '999999');
+    window.localStorage.setItem('__ppu_seen', '999999');
+    window.localStorage.setItem('pop_seen', forever);
     window.dispatchEvent(new Event('chophim:banner-blocked'));
     window.dispatchEvent(new Event('chophim:popup-ads-dismissed'));
   } catch(e) {}
@@ -79,9 +89,9 @@
   const SPAM_PATTERNS = [
     /\b\d{1,3}bet\w*/i, // 11bet, 789bet, 88bet, 188bet...
     /\b789b\w*/i,       // 789b668.me...
-    /\b(cm88|hb88|ok88|mb66|sumvip|sumpro|sumclub|78win|fc88|qq88|hi88|s8|i9|i9bet|iwin|b52|sunwin|go88|rikvip|kubet|thabet|shbet|new88|jun88|fb88|w88|bk8|dafabet|m88|fun88|v9bet)\w*/i,
+    /\b(cm88|hb88|ok88|mb66|sumvip|sumpro|sumclub|78win|fc88|qq88|hi88|s8|i9|i9bet|iwin|b52|sunwin|go88|rikvip|kubet|thabet|shbet|new88|jun88|fb88|w88|bk8|dafabet|m88|fun88|v9bet|fabet|u888|ad88)\w*/i,
     /\b(keonhacai|nhacai|soikeo|tylekeo|bongda|cacuoc|casino|nohu|taixiu|xocdia|banca|slot)\b/i,
-    /\b(linkroyal|workers\.dev\/chophim|tinyurl\.com|bit\.ly|hpasoj|154\.82\.)/i,
+    /\b(linkroyal|workers\.dev\/chophim|tinyurl\.com|bit\.ly|hpasoj|154\.82\.|adready\.vip|thlink\.cc)/i,
     /(linkvertise|ouo\.io|ouo\.press|megaurl|shorturl|1short|traffic|adbull|shrinke|exe\.io)/i,
     /(adsterra|popads|propellerads|clickadu|yllix|exoclick|trafficstars|juicyads|hilltopads|popcash|acquirecardedsullen|badlandlispyippee|astonishlandmass)/i,
     /(delivery|syndication|revenue|onclick|popunder|clickserve)/i,
@@ -198,6 +208,7 @@
   else document.addEventListener('DOMContentLoaded', injectAntiAdStyles, { once: true });
 
   // 4. Monkey-patch window.open (Kill popunders & spam redirects)
+  let lastSameOriginOpenTime = 0;
   const realOpen = window.open;
   window.open = function(url, target, features) {
     if (url && typeof url === 'string') {
@@ -209,11 +220,14 @@
         if (url.startsWith('http')) {
           const u = new URL(url, location.href);
           if (u.hostname !== location.hostname) {
-            const isStreamingSite = /xnhau|chophim|phim|tube|sex|porn|hentai|anime/i.test(location.hostname);
+            const isStreamingSite = /xnhau|chophim|phim|tube|sex|porn|hentai|anime|manga|truyen|bongda/i.test(location.hostname);
             if (isStreamingSite || isSpamUrl(u.hostname) || isSpamUrl(u.href)) {
               console.warn('[AdBlockShield] Blocked external window.open from streaming site to:', url);
               return null;
             }
+          } else if (u.href === location.href || u.pathname === location.pathname) {
+            // Track potential Tab-Under inversion attempts
+            lastSameOriginOpenTime = Date.now();
           }
         }
       } catch(e) {}
@@ -231,7 +245,7 @@
               } else {
                 try {
                   const u = new URL(newUrl, location.href);
-                  if (u.hostname !== location.hostname && (/xnhau|chophim|phim|tube|sex|porn|hentai|anime/i.test(location.hostname) || isSpamUrl(u.hostname))) {
+                  if (u.hostname !== location.hostname && (/xnhau|chophim|phim|tube|sex|porn|hentai|anime|manga|truyen|bongda/i.test(location.hostname) || isSpamUrl(u.hostname))) {
                     console.warn('[AdBlockShield] Blocked deferred external popup to:', newUrl);
                     try { win.close(); } catch(e) {}
                     return;
@@ -248,7 +262,52 @@
     return realOpen.apply(this, arguments);
   };
 
-  // 5. Monkey-patch HTMLAnchorElement.prototype.click (Kill synthetic clicks)
+  // 4.5 Monkey-patch window.location.assign & replace (Kill Tab-Under redirects)
+  try {
+    const origAssign = window.location.assign;
+    window.location.assign = function(url) {
+      if (isSpamUrl(url)) {
+        console.warn('[AdBlockShield] Blocked location.assign to spam/ad:', url);
+        return;
+      }
+      try {
+        if (url && typeof url === 'string' && url.startsWith('http')) {
+          const u = new URL(url, location.href);
+          if (u.hostname !== location.hostname) {
+            const isMediaSite = /xnhau|chophim|phim|tube|sex|porn|hentai|anime|manga|truyen|bongda/i.test(location.hostname);
+            if (isMediaSite || isSpamUrl(u.hostname) || isSpamUrl(u.href) || Date.now() - lastSameOriginOpenTime < 1000) {
+              console.warn('[AdBlockShield] Blocked external location.assign from media site / tab-under:', url);
+              return;
+            }
+          }
+        }
+      } catch(e) {}
+      return origAssign.apply(window.location, arguments);
+    };
+
+    const origReplace = window.location.replace;
+    window.location.replace = function(url) {
+      if (isSpamUrl(url)) {
+        console.warn('[AdBlockShield] Blocked location.replace to spam/ad:', url);
+        return;
+      }
+      try {
+        if (url && typeof url === 'string' && url.startsWith('http')) {
+          const u = new URL(url, location.href);
+          if (u.hostname !== location.hostname) {
+            const isMediaSite = /xnhau|chophim|phim|tube|sex|porn|hentai|anime|manga|truyen|bongda/i.test(location.hostname);
+            if (isMediaSite || isSpamUrl(u.hostname) || isSpamUrl(u.href) || Date.now() - lastSameOriginOpenTime < 1000) {
+              console.warn('[AdBlockShield] Blocked external location.replace from media site / tab-under:', url);
+              return;
+            }
+          }
+        }
+      } catch(e) {}
+      return origReplace.apply(window.location, arguments);
+    };
+  } catch(e) {}
+
+  // 5. Monkey-patch HTMLAnchorElement.prototype.click & HTMLFormElement.prototype.submit (Kill synthetic clicks & submits)
   const realAnchorClick = HTMLAnchorElement.prototype.click;
   HTMLAnchorElement.prototype.click = function() {
     const href = this.href || '';
@@ -267,6 +326,18 @@
     }
     return realAnchorClick.apply(this, arguments);
   };
+
+  try {
+    const realFormSubmit = HTMLFormElement.prototype.submit;
+    HTMLFormElement.prototype.submit = function() {
+      const action = this.action || '';
+      if (isSpamUrl(action)) {
+        console.warn('[AdBlockShield] Blocked programmatic submit on spam form:', action);
+        return;
+      }
+      return realFormSubmit.apply(this, arguments);
+    };
+  } catch(e) {}
 
   // 6. Capture Phase Click Guardian: Prevent Click-Hijacking on Window/Document
   document.addEventListener('click', (e) => {
